@@ -11,13 +11,13 @@ protected:
 	size_t capacity;
 	T* pMem;
 public:
-	TVector(size_t size = 0) : sz(size), capacity(sz * 2 + 1)
+	TVector(size_t size = 0) : sz(size), capacity(sz * 2 + 2)
 	{
 		pMem = new T[capacity];
 		if (pMem == nullptr)
 			throw std::bad_alloc();
 	}
-	TVector(T* arr, size_t s) : sz(s), capacity(sz * 2 + 1)
+	TVector(T* arr, size_t s) : sz(s), capacity(sz * 2 + 2)
 	{
 		if (arr == nullptr)
 			throw std::logic_error("TVector ctor requires non - nullptr arg");
@@ -76,7 +76,7 @@ public:
 	size_t size() const noexcept { return sz; }
 	size_t getCapacity() const noexcept{ return capacity; }
 	bool isFull() const noexcept { return (sz == capacity); }
-	bool isEmpty() const noexcept	{ return (sz == 0); }
+	bool isEmpty() const noexcept { return (sz == 0); }
 
 	// indexation
 	T& operator[] (size_t ind)
@@ -115,14 +115,14 @@ public:
 	// methods
 	void resize(size_t newsize)
 	{
-		T* p = new T[newsize * 2 + 1];
+		T* p = new T[newsize * 2 + 2];
 		if (p == nullptr)
 			throw std::bad_alloc();
 		std::copy(pMem, pMem + sz, p);
 		delete[] pMem;
 		pMem = p;
 		p = nullptr;
-		capacity = newsize * 2 + 1;
+		capacity = newsize * 2 + 2;
 	}
 	void push_back(T elem)
 	{
@@ -138,18 +138,11 @@ public:
 	}
 	void push_front(T elem)
 	{
-		if (isFull())
-			resize(sz + 1);
-		for (size_t i = 0; i < sz; i++)
-			pMem[i + 1] = pMem[i];
-		pMem[0] = elem;
-		sz++;
+		insert(elem, 0);
 	}
 	void pop_front()
 	{
-		for (size_t i = 1; i < sz; i++)
-			pMem[i - 1] = pMem[i];
-		sz--;
+		erase(0);
 	}
 	void insert(T elem, size_t ind)
 	{
@@ -157,8 +150,8 @@ public:
 			throw std::out_of_range("Index should be greater than zero and less than vector size");
 		if (sz == capacity)
 			resize(sz + 1);
-		for (size_t i = ind; i < sz; i++)
-			pMem[i + 1] = pMem[i];
+		for (size_t i = sz; i > ind; i--)
+			pMem[i] = pMem[i-1];
 		pMem[ind] = elem;
 		sz++;
 	}
@@ -168,7 +161,7 @@ public:
 			throw std::out_of_range("Index should be greater than zero and less than vector size");
 		if (sz == 0)
 			throw std::logic_error("Vector is empty");
-		for (size_t i = ind; i < sz - 1; i++)
+		for (size_t i = ind; i < sz; i++)
 			pMem[i] = pMem[i + 1];
 		sz--;
 	}
@@ -185,6 +178,9 @@ public:
 	using TVector<T>::pop_back;
 	using TVector<T>::isFull;
 	using TVector<T>::isEmpty;
+	using TVector<T>::size;
+	using TVector<T>::getCapacity;
+	using TVector<T>::resize;
 	Stack() : TVector<T>(0) { };
 	void push(T elem)
 	{
@@ -217,11 +213,11 @@ public:
 	using TVector<T>::resize;
 	using TVector<T>::size;
 	using TVector<T>::getCapacity;
-	Queue() : TVector<T>(0), front(0), back(0) { };
+	Queue() : TVector<T>(0), front(0), back(0) { }
 	void push(T elem)
 	{
 		push_back(elem);
-			if (back == capacity - 1)
+			if (back == capacity)
 				back = 0;
 			else
 				back++;
@@ -230,7 +226,7 @@ public:
 	{
 		if (isEmpty())
 			throw std::logic_error("Queue is empty");
-		if (front == capacity - 1)
+		if (front == capacity)
 			front = 0;
 		else
 			front++;
@@ -238,6 +234,7 @@ public:
 	}
 	T getFront() const noexcept { return pMem[front]; }
 	T getBack() const noexcept { if (back == 0) return pMem[capacity - 1]; return pMem[back - 1]; }
+	size_t getBackIndex() const noexcept { return back; }
 };
 
 template<typename T>
@@ -247,9 +244,9 @@ class QueueOnStacks : private TVector<Stack<T>>
 	size_t sz;
 	size_t capacity;
 public:
-	QueueOnStacks() : sz(pMem[0].size() + pMem[1].size()), capacity(pMem[0].getCapacity() + pMem[1].getCapacity()) { };
-	size_t size() const noexcept { return pMem[0].size() + pMem[1].size(); }
-	size_t getCapacity() const noexcept { return pMem[0].getCapacity() + pMem[1].getCapacity(); }
+	QueueOnStacks() : TVector<Stack<T>>(0), sz(pMem[0].size() + pMem[1].size()), capacity(pMem[0].getCapacity() + pMem[1].getCapacity()) { }
+	size_t size() const noexcept { return sz; }
+	size_t getCapacity() const noexcept { return capacity; }
 	bool isFull() const noexcept { return (pMem[0].isFull() && pMem[1].isFull()); }
 	bool isEmpty() const noexcept { return (pMem[0].isEmpty() && pMem[1].isEmpty()); }
 	void push(T elem)
@@ -262,7 +259,7 @@ public:
 		if (pMem[0].isEmpty())
 			while (!pMem[1].isEmpty())
 			{
-				T tmp{ } = pMem[1].top();
+				T tmp = pMem[1].top();
 				pMem[0].push(tmp);
 				pMem[1].pop();
 			}
