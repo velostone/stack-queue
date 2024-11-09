@@ -173,14 +173,14 @@ class Stack : private TVector<T>
 	using TVector<T>::sz;
 	using TVector<T>::capacity;
 	using TVector<T>::pMem;
-public:
 	using TVector<T>::push_back;
 	using TVector<T>::pop_back;
+	using TVector<T>::resize;
+public:
 	using TVector<T>::isFull;
 	using TVector<T>::isEmpty;
 	using TVector<T>::size;
 	using TVector<T>::getCapacity;
-	using TVector<T>::resize;
 	Stack() : TVector<T>(0) { };
 	void push(T elem)
 	{
@@ -204,13 +204,13 @@ class Queue : private TVector<T>
 	using TVector<T>::sz;
 	using TVector<T>::capacity;
 	using TVector<T>::pMem;
+	using TVector<T>::push_back;
+	using TVector<T>::resize;
 	size_t front;
 	size_t back;
 public:
-	using TVector<T>::push_back;
 	using TVector<T>::isFull;
 	using TVector<T>::isEmpty;
-	using TVector<T>::resize;
 	using TVector<T>::size;
 	using TVector<T>::getCapacity;
 	Queue() : TVector<T>(0), front(0), back(0) { }
@@ -257,12 +257,15 @@ public:
 	void pop()
 	{
 		if (pMem[0].isEmpty())
+		{
 			while (!pMem[1].isEmpty())
 			{
 				T tmp = pMem[1].top();
 				pMem[0].push(tmp);
 				pMem[1].pop();
 			}
+			pMem[0].pop();
+		}
 		else
 			pMem[0].pop();
 		sz--;

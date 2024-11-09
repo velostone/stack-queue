@@ -60,13 +60,6 @@ TEST(Stack, can_get_top_element)
     EXPECT_EQ(8, s.top());
 }
 
-TEST(Stack, can_resize_stack)
-{
-    Stack<int> s;
-    s.resize(5);
-    EXPECT_EQ(5 * 2 + 2, s.getCapacity());
-}
-
 TEST(Stack, push_uses_resize_correctly)
 {
     Stack<int> s;

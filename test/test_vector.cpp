@@ -136,10 +136,17 @@ TEST(TVector, vectors_with_different_size_are_not_equal)
     EXPECT_FALSE(v1 == v2);
 }
 
-TEST(TVector, can_check_for_full)
+TEST(TVector, can_check_for_full_1)
 {
     TVector<int> v;
     EXPECT_FALSE(v.isFull());
+}
+
+TEST(TVector, can_check_for_full_2)
+{
+    TVector<int> v;
+    v.push_back(8); v.push_back(10);
+    EXPECT_TRUE(v.isFull());
 }
 
 TEST(TVector, can_check_for_empty)
